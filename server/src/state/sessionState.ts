@@ -1,6 +1,4 @@
-interface PollResults {
-  [option: string]: Set<string>; // Guardamos Set de UUIDs por cada opción para evitar duplicados
-}
+type PollResults = Map<string, Set<string>>; // Opción -> UUIDs
 
 class SessionState {
   currentSlideIndex: number = 0;
@@ -17,30 +15,30 @@ class SessionState {
     
     // Si hay un nuevo trigger y no lo teníamos trackeado, inicializamos sus contadores
     if (trigger && !this.polls.has(trigger)) {
-      this.polls.set(trigger, {});
+      this.polls.set(trigger, new Map());
     }
   }
 
   registerVote(triggerId: string, voterUUID: string, option: string) {
     // Solo permitimos votar en el poll si ya está registrado en memoria
     if (!this.polls.has(triggerId)) {
-      this.polls.set(triggerId, {});
+      this.polls.set(triggerId, new Map());
     }
 
     const poll = this.polls.get(triggerId)!;
     
     // Si el usuario cambia de voto, primero lo removemos de las otras opciones de este mismo poll
-    Object.keys(poll).forEach(opt => {
-      if (poll[opt].has(voterUUID)) {
-        poll[opt].delete(voterUUID);
+    poll.forEach((voters, _opt) => {
+      if (voters.has(voterUUID)) {
+        voters.delete(voterUUID);
       }
     });
 
     // Añadimos el UUID a la nueva opción elegida
-    if (!poll[option]) {
-      poll[option] = new Set();
+    if (!poll.has(option)) {
+      poll.set(option, new Set());
     }
-    poll[option].add(voterUUID);
+    poll.get(option)!.add(voterUUID);
   }
 
   getPollResults(triggerId: string) {
@@ -48,8 +46,8 @@ class SessionState {
     if (!poll) return {};
 
     const results: Record<string, number> = {};
-    Object.keys(poll).forEach(option => {
-      results[option] = poll[option].size; // Devolvemos solo el conteo, no los UUIDs
+    poll.forEach((voters, option) => {
+      results[option] = voters.size; // Devolvemos solo el conteo, no los UUIDs
     });
     return results;
   }
