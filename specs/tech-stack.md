@@ -7,9 +7,9 @@
 |--------------|--------|-----------|
 | Frontend     | Vue (SPA) | Liviano, sin overhead de SSR (como Next.js), ideal para un motor standalone enfocado en animaciones y control de DOM local. |
 | Animaciones  | CSS Transitions | Suficiente para la mayoría de revelados (fade, slide). Si es necesario, integración con Motion One para animaciones más complejas del guion. |
-| Backend Realtime | Node.js + Socket.io | Estándar y robusto para sincronización de estado bi-direccional entre el presentador y la audiencia móvil. |
-| Base de datos| Supabase (Realtime / DB) | Actuará como capa de pub/sub o almacenamiento efímero de estado para la sesión activa (qué slide se ve, votos de polls activos). Reemplaza Redis en memoria para facilitar el despliegue serverless. |
-| Hosting/CI   | Vercel | Permite despliegue rápido del front-end Vue y posibles Serverless Functions. *Nota: El servidor de Socket.io puro puede requerir un adaptador o un entorno distinto (ej. Render/Railway) si Vercel Serverless Functions no soporta websockets persistentes, o usar el realtime de Supabase directamente para reemplazar Socket.io.* |
+| Backend Realtime | Node.js + Socket.io | Estándar y robusto para sincronización de estado bi-direccional entre el presentador y la audiencia móvil. Estado gestionado 100% en memoria en el servidor, priorizando baja latencia y simplicidad de despliegue sobre persistencia. |
+| Base de datos| N/A | Se ha decidido descartar Supabase y bases de datos persistentes a favor de memoria pura (`Map` en Node) para cumplir a cabalidad con la regla de datos efímeros y simplicidad. |
+| Hosting/CI   | Vercel (Front) / Render o Railway (Node) | Permite despliegue rápido del front-end Vue en Vercel. El servidor de Socket.io puro debe ir en un contenedor/servicio persistente como Render o Railway. |
 | Diagramas    | Mermaid.js / SVG | Ideal para arquitecturas técnicas y control por pasos ("capas") narrativas. |
 
 ## Alternativas Descartadas

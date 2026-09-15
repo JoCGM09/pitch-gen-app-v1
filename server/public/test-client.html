@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Client - Audience</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
+        .box { border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+        button { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; margin-right: 0.5rem; }
+        pre { background: #eee; padding: 0.5rem; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Audience Test Client</h1>
+    
+    <div class="box">
+        <h3>My UUID: <span id="uuidDisplay"></span></h3>
+        <p>Status: <span id="status">Disconnected</span></p>
+    </div>
+
+    <div class="box">
+        <h3>Current State from Presenter</h3>
+        <pre id="stateDisplay">Waiting...</pre>
+    </div>
+
+    <div class="box" id="votingSection" style="display: none;">
+        <h3>Vote for Trigger: <span id="currentTrigger"></span></h3>
+        <button onclick="vote('Yes')">Vote Yes</button>
+        <button onclick="vote('No')">Vote No</button>
+        <button onclick="vote('Maybe')">Vote Maybe</button>
+    </div>
+
+    <div class="box">
+        <h3>Poll Results</h3>
+        <pre id="resultsDisplay">Waiting for votes...</pre>
+    </div>
+
+    <script>
+        // Generate or get UUID
+        let myUuid = localStorage.getItem('voterUuid');
+        if (!myUuid) {
+            myUuid = 'user-' + Math.random().toString(36).substring(2, 9);
+            localStorage.setItem('voterUuid', myUuid);
+        }
+        document.getElementById('uuidDisplay').innerText = myUuid;
+
+        // Connect to Socket.io
+        const socket = io('http://localhost:3001');
+
+        socket.on('connect', () => {
+            document.getElementById('status').innerText = 'Connected';
+            document.getElementById('status').style.color = 'green';
+        });
+
+        socket.on('disconnect', () => {
+            document.getElementById('status').innerText = 'Disconnected';
+            document.getElementById('status').style.color = 'red';
+        });
+
+        let activeTrigger = null;
+
+        // Listen for sync from presenter
+        socket.on('audience:sync', (state) => {
+            console.log('[audience:sync]', state);
+            document.getElementById('stateDisplay').innerText = JSON.stringify(state, null, 2);
+            
+            if (state.activeTrigger) {
+                activeTrigger = state.activeTrigger;
+                document.getElementById('currentTrigger').innerText = activeTrigger;
+                document.getElementById('votingSection').style.display = 'block';
+            } else {
+                activeTrigger = null;
+                document.getElementById('votingSection').style.display = 'none';
+            }
+        });
+
+        // Listen for results broadcast
+        socket.on('poll:results', (data) => {
+            console.log('[poll:results]', data);
+            document.getElementById('resultsDisplay').innerText = JSON.stringify(data, null, 2);
+        });
+
+        // Vote function
+        function vote(option) {
+            if (!activeTrigger) return alert('No active poll');
+            
+            console.log('Voting', option, 'for', activeTrigger);
+            socket.emit('audience:vote', {
+                triggerId: activeTrigger,
+                uuid: myUuid,
+                option: option
+            });
+        }
+    </script>
+</body>
+</html>

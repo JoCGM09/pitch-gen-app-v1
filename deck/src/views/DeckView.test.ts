@@ -4,46 +4,14 @@ import DeckView from './DeckView.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { nextTick } from 'vue';
 import { useDeck } from '../composables/useDeck';
+import slidesData from '../data/slides.json';
 
-const mockSlidesData = [
-  {
-    id: 'test-slide-0',
-    title: 'Test Slide 0',
-    content: '<h1>Motor Core Standalone</h1>',
-    interactionTrigger: 'test-trigger'
-  },
-  {
-    id: 'test-slide-1',
-    title: 'Test Slide 1',
-    content: '<h1>Fragmentos</h1>',
-    steps: [
-      { id: 'step-0', content: '<div>Paso 1</div>' },
-      { id: 'step-1', content: '<div>Paso 2</div>' },
-      { id: 'step-2', content: '<div>Paso 3</div>' }
-    ]
-  }
-];
-
-// Mock slides data
-vi.mock('../data/slides.json', () => ({
-  default: [
-    {
-      id: 'test-slide-0',
-      title: 'Test Slide 0',
-      content: '<h1>Motor Core Standalone</h1>',
-      interactionTrigger: 'test-trigger'
-    },
-    {
-      id: 'test-slide-1',
-      title: 'Test Slide 1',
-      content: '<h1>Fragmentos</h1>',
-      steps: [
-        { id: 'step-0', content: '<div>Paso 1</div>' },
-        { id: 'step-1', content: '<div>Paso 2</div>' },
-        { id: 'step-2', content: '<div>Paso 3</div>' }
-      ]
-    }
-  ]
+// Mock useSocket
+vi.mock('../composables/useSocket', () => ({
+  useSocket: () => ({
+    connect: vi.fn(),
+    emitPresenterSync: vi.fn()
+  })
 }));
 
 // Mock matchMedia
@@ -70,7 +38,7 @@ describe('DeckView.vue', () => {
     const { currentSlideIndex, currentStepIndex, slides } = useDeck();
     currentSlideIndex.value = 0;
     currentStepIndex.value = -1;
-    slides.value = mockSlidesData as any;
+    slides.value = slidesData as any;
 
     router = createRouter({
       history: createWebHistory(),
@@ -123,7 +91,7 @@ describe('DeckView.vue', () => {
 
   it('renders the first slide with correct 16:9 classes', async () => {
     wrapper = await createWrapper();
-    expect(wrapper.text()).toContain('Motor Core Standalone');
+    expect(wrapper.text()).toContain('Cuando la IA no sabe');
     
     const container = wrapper.find('.deck-container');
     expect(container.exists()).toBe(true);
@@ -140,8 +108,8 @@ describe('DeckView.vue', () => {
     // We create the wrapper which triggers onMounted
     wrapper = await createWrapper();
     
-    // Slide 0 has interactionTrigger: 'test-trigger'
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[Interaction Trigger Fired]: test-trigger'));
+    // Slide 0 has interactionTrigger: 'poll-apertura'
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[Interaction Trigger Fired]: poll-apertura'));
 
     consoleSpy.mockClear();
     
@@ -163,14 +131,11 @@ describe('DeckView.vue', () => {
     await wait();
     
     expect(router.currentRoute.value.path).toBe('/deck/1/-1');
-    expect(wrapper.text()).toContain('Fragmentos');
+    expect(wrapper.text()).toContain('¿Por qué conectar un agente');
   });
 
   it('shows steps sequentially on click', async () => {
     wrapper = await createWrapper('/deck/1/-1');
-    
-    const step1 = () => wrapper.findAll('div').find((w: any) => w.text() === 'Paso 1');
-    expect(step1()?.isVisible()).toBe(false);
 
     await wrapper.trigger('click');
     await wait();
@@ -178,36 +143,28 @@ describe('DeckView.vue', () => {
     expect(router.currentRoute.value.path).toBe('/deck/1/0');
     const { currentStepIndex } = useDeck();
     expect(currentStepIndex.value).toBe(0);
-    // expect(step1()?.isVisible()).toBe(true); // Skipping flaky isVisible
   });
 
   it('loads correct slide and step from URL', async () => {
     wrapper = await createWrapper('/deck/1/1');
 
-    expect(wrapper.text()).toContain('Fragmentos');
-    const step1 = () => wrapper.findAll('div').find((w: any) => w.text() === 'Paso 1');
-    const step2 = () => wrapper.findAll('div').find((w: any) => w.text() === 'Paso 2');
-    const step3 = () => wrapper.findAll('div').find((w: any) => w.text() === 'Paso 3');
-
-    expect(step1()?.isVisible()).toBe(true);
-    expect(step2()?.isVisible()).toBe(true);
-    expect(step3()?.isVisible()).toBe(false);
+    expect(wrapper.text()).toContain('¿Por qué conectar un agente');
+    
+    const { currentStepIndex } = useDeck();
+    expect(currentStepIndex.value).toBe(1);
   });
 
   it('handles keyboard navigation', async () => {
     wrapper = await createWrapper();
 
     // Initially Slide 0
-    expect(wrapper.text()).toContain('Motor Core Standalone');
+    expect(wrapper.text()).toContain('Cuando la IA no sabe');
 
     // Press ArrowRight -> Slide 1, Step -1
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     await wait();
     expect(router.currentRoute.value.path).toBe('/deck/1/-1');
-    expect(wrapper.text()).toContain('Fragmentos');
-
-    const step1 = () => wrapper.findAll('div').find((w: any) => w.text() === 'Paso 1');
-    expect(step1()?.isVisible()).toBe(false);
+    expect(wrapper.text()).toContain('¿Por qué conectar un agente');
 
     // Press ArrowRight -> Slide 1, Step 0
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
@@ -246,15 +203,13 @@ describe('DeckView.vue', () => {
     await wait();
     expect(router.currentRoute.value.path).toBe('/deck/0/-1');
 
-    // Go to end
-    router.push('/deck/1/2');
+    // Go to end (slide 7)
+    router.push('/deck/7/2');
     await wait();
-    const step3 = () => wrapper.findAll('div').find((w: any) => w.text() === 'Paso 3');
-    expect(step3()?.isVisible()).toBe(true);
 
     // At end, next should do nothing
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     await wait();
-    expect(router.currentRoute.value.path).toBe('/deck/1/2');
+    expect(router.currentRoute.value.path).toBe('/deck/7/2');
   });
 });

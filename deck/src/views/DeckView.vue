@@ -42,11 +42,13 @@ import DOMPurify from 'dompurify';
 import AwsArchitectureDiagram from '../components/AwsArchitectureDiagram.vue';
 import { useDeck } from '../composables/useDeck';
 import { useKeyboardControls } from '../composables/useKeyboardControls';
+import { useSocket } from '../composables/useSocket';
 import slidesData from '../data/slides.json';
 
 const route = useRoute();
 const router = useRouter();
 const { initDeck, currentSlide, currentSlideIndex, currentStepIndex, next, prev } = useDeck();
+const { connect, emitPresenterSync } = useSocket();
 
 const sanitize = (html: string) => DOMPurify.sanitize(html);
 
@@ -55,7 +57,16 @@ useKeyboardControls({ next, prev });
 onMounted(() => {
   // Inicializamos con el JSON parseado de pitch.md en vez de dummySlides
   initDeck(slidesData as any);
+  connect();
   syncStateFromRoute();
+  
+  // Emisión inicial al servidor
+  const slide = slidesData[currentSlideIndex.value] as any;
+  const trigger = slide && slide.interactionTrigger ? slide.interactionTrigger : null;
+  emitPresenterSync(currentSlideIndex.value, currentStepIndex.value, trigger);
+  if (trigger) {
+    console.log(`[Interaction Trigger Fired]: ${trigger} en la slide ${currentSlideIndex.value}`);
+  }
 });
 
 // Actualizar el estado interno si la URL cambia (ej. el usuario usa Back/Forward en el navegador)
@@ -63,7 +74,7 @@ watch(() => route.params, () => {
   syncStateFromRoute();
 });
 
-// Sincronizar la URL si el estado interno cambia
+// Sincronizar la URL y emitir al servidor si el estado interno cambia
 watch([currentSlideIndex, currentStepIndex], ([newSlide, newStep]) => {
   const currentRouteSlide = parseInt(route.params.slide as string, 10);
   const currentRouteStep = parseInt(route.params.step as string, 10);
@@ -71,16 +82,14 @@ watch([currentSlideIndex, currentStepIndex], ([newSlide, newStep]) => {
   if (newSlide !== currentRouteSlide || newStep !== currentRouteStep) {
     router.push(`/deck/${newSlide}/${newStep}`);
   }
-});
 
-// Watcher para simular la emisión de interacción cuando entramos a una slide con trigger
-watch(currentSlideIndex, (newIndex) => {
-  const slide = slidesData[newIndex] as any;
-  if (slide && slide.interactionTrigger) {
-    console.log(`[Interaction Trigger Fired]: ${slide.interactionTrigger} en la slide ${newIndex}`);
-    // Aquí, en la Fase 3, emitiremos por Socket.io hacia el servidor.
+  const slide = slidesData[newSlide] as any;
+  const trigger = slide && slide.interactionTrigger ? slide.interactionTrigger : null;
+  emitPresenterSync(newSlide, newStep, trigger);
+  if (trigger) {
+    console.log(`[Interaction Trigger Fired]: ${trigger} en la slide ${newSlide}`);
   }
-}, { immediate: true });
+});
 
 function syncStateFromRoute() {
   if (route.name === 'deck') {
