@@ -20,6 +20,7 @@ describe('SessionState', () => {
   });
 
   it('should register votes correctly', () => {
+    globalState.syncPresenter(0, 0, 'poll1');
     globalState.registerVote('poll1', 'user1', 'A');
     globalState.registerVote('poll1', 'user2', 'B');
     globalState.registerVote('poll1', 'user3', 'A');
@@ -29,6 +30,7 @@ describe('SessionState', () => {
   });
 
   it('should change user vote if they vote again in the same poll', () => {
+    globalState.syncPresenter(0, 0, 'poll1');
     globalState.registerVote('poll1', 'user1', 'A');
     globalState.registerVote('poll1', 'user1', 'B');
 
