@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
 
   socket.on('presenter:sync', (payload: { slideIndex: number, stepIndex: number, trigger: string | null, secret?: string }) => {
     // 1. Autorización dinámica evaluada contra env
-    if (payload.secret !== process.env.PRESENTER_SECRET) {
+    if (!process.env.PRESENTER_SECRET || payload.secret !== process.env.PRESENTER_SECRET) {
       console.warn(`[Socket] Intento no autorizado de presenter:sync desde ${socket.id}`);
       return;
     }
@@ -89,7 +89,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('presenter:reset', (payload: { secret?: string }) => {
-    if (payload.secret !== process.env.PRESENTER_SECRET) {
+    if (!process.env.PRESENTER_SECRET || payload.secret !== process.env.PRESENTER_SECRET) {
       return;
     }
     globalState.resetSession();
@@ -101,14 +101,14 @@ io.on('connection', (socket) => {
   });
 
   socket.on('presenter:get-qa', (payload: { secret?: string }) => {
-    if (payload.secret !== process.env.PRESENTER_SECRET) {
+    if (!process.env.PRESENTER_SECRET || payload.secret !== process.env.PRESENTER_SECRET) {
       return;
     }
     socket.emit('qa:list', globalState.getQAQuestions());
   });
 
   socket.on('presenter:remove-qa', (payload: { secret?: string, id: string }) => {
-    if (payload.secret !== process.env.PRESENTER_SECRET) {
+    if (!process.env.PRESENTER_SECRET || payload.secret !== process.env.PRESENTER_SECRET) {
       return;
     }
     if (typeof payload.id === 'string') {
@@ -130,7 +130,8 @@ io.on('connection', (socket) => {
 
     // 2. Rate Limiting simple (Bypass in test) basado en la IP
     const now = Date.now();
-    const clientIp = socket.handshake.address;
+    // Obtener la IP real detrás del proxy (ej. Render) o la dirección directa
+    const clientIp = (socket.handshake.headers['x-forwarded-for'] as string) || socket.handshake.address;
     const lastVoteTime = voteRateLimits.get(clientIp) || 0;
     const isTest = process.env.NODE_ENV === 'test';
     
@@ -166,7 +167,7 @@ io.on('connection', (socket) => {
 
     // Rate limit Q&A: 1 pregunta cada 30s basado en IP (Bypass in test)
     const now = Date.now();
-    const clientIp = socket.handshake.address;
+    const clientIp = (socket.handshake.headers['x-forwarded-for'] as string) || socket.handshake.address;
     const lastQaTime = qaRateLimits.get(clientIp) || 0;
     const isTest = process.env.NODE_ENV === 'test';
 

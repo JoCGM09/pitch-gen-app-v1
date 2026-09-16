@@ -26,6 +26,12 @@ class SessionState {
   }
 
   registerVote(triggerId: string, voterUUID: string, option: string) {
+    // SECURITY: Only allow votes for the currently active trigger
+    // or triggers that have already been initialized by the presenter
+    if (triggerId !== this.activeTrigger && !this.polls.has(triggerId)) {
+      return;
+    }
+
     if (!this.polls.has(triggerId)) {
       this.polls.set(triggerId, new Map());
     }
