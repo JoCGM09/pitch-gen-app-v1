@@ -4,36 +4,73 @@
 
 @layer base {
   body {
-    @apply bg-background-main text-text-main font-sans;
+    @apply bg-background-main text-text-main font-sans overflow-hidden select-none;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    background-image: 
+      radial-gradient(at 20% 20%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 80%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.6) 0px, transparent 100%);
   }
+}
+
+/* Glassmorphism utility card */
+.glass-card {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 12px 40px -10px rgba(59, 130, 246, 0.2);
 }
 
 /* Transición Fade para cambios de Slide */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fade-enter-from,
+.fade-enter-from {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
 .fade-leave-to {
   opacity: 0;
+  transform: scale(1.02);
 }
 
 /* Transición Slide-up para los Fragments (pasos) */
 .slide-up-enter-active,
 .slide-up-leave-active {
-  transition: all 0.4s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .slide-up-enter-from {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(24px) scale(0.97);
 }
 
 .slide-up-leave-to {
   opacity: 0;
-  transform: translateY(-20px);
+  transform: translateY(-24px) scale(0.97);
+}
+
+/* Pulse dash animation for SVG lines */
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+.animate-dash-flow {
+  animation: dash-flow 1.5s linear infinite;
 }

@@ -6,11 +6,18 @@ import { nextTick } from 'vue';
 import { useDeck } from '../composables/useDeck';
 import slidesData from '../data/slides.json';
 
+import { ref } from 'vue';
+
 // Mock useSocket
 vi.mock('../composables/useSocket', () => ({
   useSocket: () => ({
     connect: vi.fn(),
-    emitPresenterSync: vi.fn()
+    emitPresenterSync: vi.fn(),
+    emitPresenterReset: vi.fn(),
+    requestQAList: vi.fn(),
+    qaQuestionsList: ref([]),
+    activePollResults: ref({}),
+    simulateVote: vi.fn()
   })
 }));
 
@@ -105,21 +112,20 @@ describe('DeckView.vue', () => {
   it('fires interaction trigger on slide change', async () => {
     const consoleSpy = vi.spyOn(console, 'log');
     
-    // We create the wrapper which triggers onMounted
+    // We create the wrapper which triggers onMounted on Slide 0
     wrapper = await createWrapper();
     
-    // Slide 0 has interactionTrigger: 'poll-apertura'
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[Interaction Trigger Fired]: poll-apertura'));
+    // Slide 0 has no trigger
+    const initialLogs = consoleSpy.mock.calls.filter(call => call[0].includes('[Interaction Trigger Fired]'));
+    expect(initialLogs.length).toBe(0);
 
     consoleSpy.mockClear();
     
-    // Go to Slide 1 (no trigger)
+    // Go to Slide 1 (has trigger 'poll-apertura')
     await wrapper.trigger('click');
     await wait();
     
-    // Filter out potential other logs from router or vue
-    const triggerLogs = consoleSpy.mock.calls.filter(call => call[0].includes('[Interaction Trigger Fired]'));
-    expect(triggerLogs.length).toBe(0);
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[Interaction Trigger Fired]: poll-apertura'));
     
     consoleSpy.mockRestore();
   });
@@ -131,22 +137,28 @@ describe('DeckView.vue', () => {
     await wait();
     
     expect(router.currentRoute.value.path).toBe('/deck/1/-1');
+    expect(wrapper.text()).toContain('Pregunta de Apertura');
+
+    await wrapper.trigger('click');
+    await wait();
+
+    expect(router.currentRoute.value.path).toBe('/deck/2/-1');
     expect(wrapper.text()).toContain('¿Por qué conectar un agente');
   });
 
   it('shows steps sequentially on click', async () => {
-    wrapper = await createWrapper('/deck/1/-1');
+    wrapper = await createWrapper('/deck/2/-1');
 
     await wrapper.trigger('click');
     await wait();
     
-    expect(router.currentRoute.value.path).toBe('/deck/1/0');
+    expect(router.currentRoute.value.path).toBe('/deck/2/0');
     const { currentStepIndex } = useDeck();
     expect(currentStepIndex.value).toBe(0);
   });
 
   it('loads correct slide and step from URL', async () => {
-    wrapper = await createWrapper('/deck/1/1');
+    wrapper = await createWrapper('/deck/2/1');
 
     expect(wrapper.text()).toContain('¿Por qué conectar un agente');
     
@@ -164,18 +176,24 @@ describe('DeckView.vue', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     await wait();
     expect(router.currentRoute.value.path).toBe('/deck/1/-1');
-    expect(wrapper.text()).toContain('¿Por qué conectar un agente');
+    expect(wrapper.text()).toContain('Pregunta de Apertura');
 
-    // Press ArrowRight -> Slide 1, Step 0
+    // Press ArrowRight -> Slide 2, Step -1
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     await wait();
-    expect(router.currentRoute.value.path).toBe('/deck/1/0');
+    expect(router.currentRoute.value.path).toBe('/deck/2/-1');
+    expect(wrapper.text()).toContain('¿Por qué conectar un agente');
+
+    // Press ArrowRight -> Slide 2, Step 0
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    await wait();
+    expect(router.currentRoute.value.path).toBe('/deck/2/0');
     expect(useDeck().currentStepIndex.value).toBe(0);
 
-    // Press ArrowLeft -> Slide 1, Step -1
+    // Press ArrowLeft -> Slide 2, Step -1
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     await wait();
-    expect(router.currentRoute.value.path).toBe('/deck/1/-1');
+    expect(router.currentRoute.value.path).toBe('/deck/2/-1');
     expect(useDeck().currentStepIndex.value).toBe(-1);
   });
 
@@ -203,13 +221,13 @@ describe('DeckView.vue', () => {
     await wait();
     expect(router.currentRoute.value.path).toBe('/deck/0/-1');
 
-    // Go to end (slide 7)
-    router.push('/deck/7/2');
+    // Go to end (slide 15)
+    router.push('/deck/15/-1');
     await wait();
 
     // At end, next should do nothing
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
     await wait();
-    expect(router.currentRoute.value.path).toBe('/deck/7/2');
+    expect(router.currentRoute.value.path).toBe('/deck/15/-1');
   });
 });

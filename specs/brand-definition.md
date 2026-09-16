@@ -1,40 +1,32 @@
 # Definición de Marca: Pitch Gen
 
-## Identidad del Proyecto
-* **Nombre:** Pitch Gen
-* **Descripción:** Motor de presentaciones web a medida enfocado en navegación robusta y sincronización automática de encuestas con la audiencia móvil.
-* **Tono:** Técnico, directo, profesional pero con un toque de modernidad. Estilo "dev-tool", priorizando la claridad y reduciendo el ruido visual para destacar la información.
-* **Keywords del tono:** Minimalista, Funcional, Confiable, Preciso.
-
-## Ejemplos de Copy (Tono)
-* **Estado vacío:** "No hay encuestas activas. Avanza a la siguiente slide para lanzar una."
-* **Botón principal:** "Copiar Link de Sesión"
-* **Mensaje de error:** "Error de conexión. Fallback local activado."
-
-## Paleta de Colores
-* **Tema Principal:** Oscuro (Dark Mode Only para proyector).
-* **Fondo Principal:** `#0D1117` (Gris muy oscuro/Azul noche profundo).
-* **Texto Principal:** `#F8FAFC` (Slate 50 - Blanco roto para reducir fatiga visual).
-* **Acento Principal:** `#3B82F6` (Blue 500 - Para enlaces, indicadores activos y progreso).
-* **Acento Secundario:** `#8B5CF6` (Violet 500 - Para elementos de interacción especial o acentos visuales).
-* **Semánticos:**
-  * Éxito: `#10B981` (Emerald 500)
-  * Error: `#EF4444` (Red 500)
-
-### Accesibilidad (Contraste)
-* `#F8FAFC` sobre `#0D1117`: Ratio > 18:1 (Pasa AA/AAA).
-* `#3B82F6` sobre `#0D1117`: Ratio ~ 5.15:1 (Pasa AA para texto normal).
-* `#8B5CF6` sobre `#0D1117`: Ratio ~ 4.7:1 (Pasa AA para texto normal).
+## Contexto y Tono
+- **Producto:** Motor de presentación web a medida con interacción sincronizada de audiencia.
+- **Tono de Voz:** Profesional, técnico, eficiente y directo.
+- **Entorno Principal:** Ambientes oscuros (proyección en salas, auditorios) y pantallas móviles forzadas a coincidir con esta estética para minimizar el impacto lumínico durante la presentación.
 
 ## Tipografía
-* **Familia principal (UI y cuerpo):** `Inter`, `Roboto`, o similar sans-serif limpia.
-* **Familia monospace (código o datos técnicos):** `JetBrains Mono`, `Fira Code`.
-* **Pesos:**
-  * Regular (400) para cuerpo.
-  * Medium (500) para botones y etiquetas.
-  * Bold (700) para títulos de slides.
+- **Fuente Principal:** Inter (o system-ui). Seleccionada por su excelente legibilidad en pantallas digitales, esencial para un deck de presentación y opciones de encuestas en dispositivos móviles.
+- **Jerarquía:** 
+  - Títulos: Bold (700)
+  - Cuerpo: Regular (400) / Medium (500) para botones.
 
-## Reglas Visuales Adicionales
-* **Espaciado:** Sistema base de 4px/8px (Tailwind por defecto).
-* **Bordes:** Ligeramente redondeados (`rounded-md` de Tailwind) para no ser excesivamente rígido, pero manteniendo la seriedad.
-* **Transiciones:** Suaves (fade, transform-slide) para entradas, nunca rebotes ni físicas elásticas ("spring").
+## Paleta de Color (Modo Oscuro Forzado)
+Se prioriza un entorno Dark Mode, con colores de acento vibrantes para guiar la interacción (botones, encuestas).
+
+- **Fondo Principal:** `#111827` (Gray 900) - Oscuro pero no negro puro para reducir fatiga visual.
+- **Texto Principal:** `#F3F4F6` (Gray 100) - Contraste alto pero cómodo.
+- **Primario / Acción:** `#3B82F6` (Blue 500) - Usado para botones principales y selección.
+- **Acento / Resaltado:** `#10B981` (Emerald 500) - Usado para estados de éxito o opciones seleccionadas.
+- **Superficies / Tarjetas:** `#1F2937` (Gray 800) - Para destacar opciones de poll sobre el fondo.
+
+*Nota de Accesibilidad:* La combinación de texto `#F3F4F6` sobre fondo `#111827` ha sido verificada arrojando un ratio de **16.12:1**, pasando holgadamente los estándares AA y AAA.
+
+## Reglas de Interacción y Animación
+- **Animaciones UI Móvil:** Aparición de encuestas mediante **Fade Simple** (`opacity` transition). Se prohíben animaciones complejas (bounces, slides pronunciados) para mantener la seriedad técnica y la inmediatez.
+- **Selección de Encuestas:** Retroalimentación inmediata de selección (cambio de color de borde/fondo) y bloqueo visual tras el voto.
+
+## Vocabulario y Copy
+- **Acciones:** "Enviar", "Votar", "Confirmar".
+- **Mensajes de Espera:** "Esperando la siguiente pregunta...", "Mira a la pantalla principal".
+- Evitar jerga confusa o lenguaje excesivamente lúdico.

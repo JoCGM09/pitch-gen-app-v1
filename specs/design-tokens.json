@@ -1,24 +1,36 @@
 {
   "colors": {
-    "background": {
-      "main": "#0D1117"
-    },
+    "background": "#111827",
+    "surface": "#1F2937",
     "text": {
-      "main": "#F8FAFC"
+      "primary": "#F3F4F6",
+      "secondary": "#9CA3AF"
     },
-    "brand": {
-      "primary": "#3B82F6",
-      "secondary": "#8B5CF6"
+    "primary": {
+      "main": "#3B82F6",
+      "hover": "#2563EB"
     },
-    "semantic": {
-      "success": "#10B981",
-      "error": "#EF4444"
+    "success": {
+      "main": "#10B981"
     }
   },
   "typography": {
-    "fonts": {
-      "sans": "Inter, ui-sans-serif, system-ui, sans-serif",
-      "mono": "JetBrains Mono, ui-monospace, SFMono-Regular, monospace"
+    "family": {
+      "sans": "Inter, system-ui, sans-serif"
+    },
+    "weights": {
+      "regular": 400,
+      "medium": 500,
+      "bold": 700
+    }
+  },
+  "animation": {
+    "duration": {
+      "fast": "150ms",
+      "normal": "300ms"
+    },
+    "easing": {
+      "fade": "ease-in-out"
     }
   }
 }

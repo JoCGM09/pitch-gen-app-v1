@@ -1,8 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import { io as Client, type Socket as ClientSocket } from 'socket.io-client';
+import { AddressInfo } from 'net';
+
+// Establecer variables de entorno ANTES de importar app/server
+process.env.PRESENTER_SECRET = 'dev-secret-key';
+process.env.ALLOWED_ORIGIN = 'http://localhost:5173';
+
 import { server, io } from './index';
 import { globalState } from './state/sessionState';
-import { AddressInfo } from 'net';
 
 describe('Server Integration', () => {
   let clientSocket: ClientSocket;
@@ -28,6 +33,9 @@ describe('Server Integration', () => {
     globalState.activeTrigger = null;
     globalState.polls.clear();
     
+    // Configurar secreto para el test de autorización
+    process.env.PRESENTER_SECRET = 'dev-secret-key';
+
     clientSocket = Client(`http://localhost:${port}`);
   });
 

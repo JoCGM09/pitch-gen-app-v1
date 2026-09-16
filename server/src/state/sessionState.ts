@@ -1,41 +1,48 @@
 type PollResults = Map<string, Set<string>>; // Opción -> UUIDs
 
+export interface QAQuestion {
+  id: string;
+  uuid: string;
+  question: string;
+  timestamp: number;
+}
+
 class SessionState {
   currentSlideIndex: number = 0;
   currentStepIndex: number = -1;
   activeTrigger: string | null = null;
   
-  // Guardamos resultados agregados para cada poll (TriggerID -> Opcion -> UUIDs)
   polls: Map<string, PollResults> = new Map();
+  qaQuestions: QAQuestion[] = [];
 
   syncPresenter(slideIndex: number, stepIndex: number, trigger: string | null) {
     this.currentSlideIndex = slideIndex;
     this.currentStepIndex = stepIndex;
     this.activeTrigger = trigger;
     
-    // Si hay un nuevo trigger y no lo teníamos trackeado, inicializamos sus contadores
     if (trigger && !this.polls.has(trigger)) {
       this.polls.set(trigger, new Map());
     }
   }
 
   registerVote(triggerId: string, voterUUID: string, option: string) {
-    // Solo permitimos votar en el poll si ya está registrado en memoria
     if (!this.polls.has(triggerId)) {
       this.polls.set(triggerId, new Map());
     }
 
     const poll = this.polls.get(triggerId)!;
     
-    // Si el usuario cambia de voto, primero lo removemos de las otras opciones de este mismo poll
     poll.forEach((voters, _opt) => {
       if (voters.has(voterUUID)) {
         voters.delete(voterUUID);
       }
     });
 
-    // Añadimos el UUID a la nueva opción elegida
     if (!poll.has(option)) {
+      // Limit number of options per poll to prevent memory exhaustion by attackers
+      if (poll.size >= 10) {
+        return;
+      }
       poll.set(option, new Set());
     }
     poll.get(option)!.add(voterUUID);
@@ -47,9 +54,26 @@ class SessionState {
 
     const results: Record<string, number> = {};
     poll.forEach((voters, option) => {
-      results[option] = voters.size; // Devolvemos solo el conteo, no los UUIDs
+      results[option] = voters.size;
     });
     return results;
+  }
+
+  addQAQuestion(question: QAQuestion) {
+    this.qaQuestions.unshift(question);
+    if (this.qaQuestions.length > 50) {
+      this.qaQuestions.pop();
+    }
+  }
+  
+  getQAQuestions() {
+    return this.qaQuestions;
+  }
+
+  resetSession() {
+    this.polls.clear();
+    this.qaQuestions = [];
+    this.activeTrigger = null;
   }
 
   getSnapshot() {
@@ -61,5 +85,4 @@ class SessionState {
   }
 }
 
-// Instancia global en memoria
 export const globalState = new SessionState();

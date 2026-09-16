@@ -8,14 +8,17 @@ export default {
     extend: {
       colors: {
         background: {
-          main: "#0D1117"
+          main: "#111827",
+          surface: "#1F2937",
+          card: "#1F2937"
         },
         text: {
-          main: "#F8FAFC"
+          main: "#F3F4F6",
+          muted: "#9CA3AF"
         },
         brand: {
           primary: "#3B82F6",
-          secondary: "#8B5CF6"
+          secondary: "#2563EB",
         },
         semantic: {
           success: "#10B981",
@@ -23,8 +26,16 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace']
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-in-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        }
       }
     },
   },
