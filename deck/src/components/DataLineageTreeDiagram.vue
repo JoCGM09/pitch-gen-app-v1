@@ -1,12 +1,12 @@
 <template>
-  <div class="glass-card rounded-2xl p-6 border border-slate-800/80 shadow-2xl space-y-6 my-2">
+  <div class="glass-card rounded-2xl p-6 border border-slate-800/80 shadow-2xl space-y-6 my-2 bg-slate-950/80">
     <!-- Header -->
     <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
       <div class="flex items-center gap-3">
         <span class="px-2.5 py-1 rounded bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono text-xs font-bold uppercase">
           Grafo de Linaje Interactivo
         </span>
-        <h3 class="font-display font-bold text-slate-100 text-lg">Trazabilidad End-to-End & Linaje a Nivel de Columna</h3>
+        <h3 class="font-sans font-bold text-slate-100 text-lg">Trazabilidad End-to-End & Linaje a Nivel de Columna</h3>
       </div>
       <span class="font-mono text-xs text-slate-400">Paso {{ Math.max(1, currentStep + 1) }} / 3</span>
     </div>
@@ -33,21 +33,21 @@
                 :stroke="currentStep === 0 ? '#10B981' : '#334155'" 
                 :stroke-width="currentStep === 0 ? '2.5' : '1.5'" />
           <text x="120" y="55" text-anchor="middle" fill="#10B981" class="font-mono text-xs font-bold uppercase">1. Upstream Source</text>
-          <text x="120" y="78" text-anchor="middle" fill="#F8FAFC" class="font-display font-semibold text-xs">postgres.raw_transactions</text>
+          <text x="120" y="78" text-anchor="middle" fill="#F8FAFC" class="font-sans font-semibold text-xs">postgres.raw_transactions</text>
           <text x="120" y="98" text-anchor="middle" fill="#64748B" class="font-mono text-[10px]">Columna: amount, region</text>
 
           <rect x="20" y="150" width="200" height="90" rx="10" fill="#0F172A" 
                 :stroke="currentStep === 0 ? '#10B981' : '#334155'" 
                 :stroke-width="currentStep === 0 ? '2.5' : '1.5'" />
           <text x="120" y="175" text-anchor="middle" fill="#10B981" class="font-mono text-xs font-bold uppercase">1. Upstream Source</text>
-          <text x="120" y="198" text-anchor="middle" fill="#F8FAFC" class="font-display font-semibold text-xs">s3.user_activity_logs</text>
+          <text x="120" y="198" text-anchor="middle" fill="#F8FAFC" class="font-sans font-semibold text-xs">s3.user_activity_logs</text>
           <text x="120" y="218" text-anchor="middle" fill="#64748B" class="font-mono text-[10px]">Columna: session_id, user_id</text>
         </g>
 
         <!-- CONNECTORS 1 -> 2 -->
-        <path d="M 220 75 L 340 100" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#lineage-arrow)" 
+        <path d="M 220 75 L 340 100" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#lineage-arrow)" 
               :class="{'opacity-100 animate-dash-flow': currentStep >= 1, 'opacity-20': currentStep < 1}" class="transition-opacity duration-500" />
-        <path d="M 220 195 L 340 170" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#lineage-arrow)" 
+        <path d="M 220 195 L 340 170" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#lineage-arrow)" 
               :class="{'opacity-100 animate-dash-flow': currentStep >= 1, 'opacity-20': currentStep < 1}" class="transition-opacity duration-500" />
 
         <!-- LAYER 2: DBT TRANSFORMATIONS (Step >= 1) -->
@@ -56,7 +56,7 @@
                 :stroke="currentStep === 1 ? '#8B5CF6' : '#334155'" 
                 :stroke-width="currentStep === 1 ? '3' : '1.5'" />
           <text x="450" y="95" text-anchor="middle" fill="#8B5CF6" class="font-mono text-xs font-bold uppercase">2. Transformación dbt</text>
-          <text x="450" y="120" text-anchor="middle" fill="#F8FAFC" class="font-display font-bold text-sm">fct_daily_revenue.sql</text>
+          <text x="450" y="120" text-anchor="middle" fill="#F8FAFC" class="font-sans font-bold text-sm">fct_daily_revenue.sql</text>
 
           <rect x="360" y="135" width="180" height="48" rx="6" fill="#0F172A" stroke="#8B5CF6" stroke-width="1" />
           <text x="450" y="153" text-anchor="middle" fill="#C084FC" class="font-mono text-[10px]">dbt-athena materialization</text>
@@ -64,9 +64,9 @@
         </g>
 
         <!-- CONNECTORS 2 -> 3 -->
-        <path d="M 560 115 L 680 85" stroke="#3B82F6" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#lineage-arrow-blue)" 
+        <path d="M 560 115 L 680 85" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#lineage-arrow-blue)" 
               :class="{'opacity-100 animate-dash-flow': currentStep >= 2, 'opacity-20': currentStep < 2}" class="transition-opacity duration-500" />
-        <path d="M 560 155 L 680 185" stroke="#3B82F6" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#lineage-arrow-blue)" 
+        <path d="M 560 155 L 680 185" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#lineage-arrow-blue)" 
               :class="{'opacity-100 animate-dash-flow': currentStep >= 2, 'opacity-20': currentStep < 2}" class="transition-opacity duration-500" />
 
         <!-- LAYER 3: DOWNSTREAM CONSUMERS (Step >= 2) -->
@@ -75,14 +75,14 @@
                 :stroke="currentStep === 2 ? '#3B82F6' : '#334155'" 
                 :stroke-width="currentStep === 2 ? '2.5' : '1.5'" />
           <text x="780" y="65" text-anchor="middle" fill="#3B82F6" class="font-mono text-xs font-bold uppercase">3. Downstream</text>
-          <text x="780" y="88" text-anchor="middle" fill="#F8FAFC" class="font-display font-semibold text-xs">Executive Dashboard</text>
+          <text x="780" y="88" text-anchor="middle" fill="#F8FAFC" class="font-sans font-semibold text-xs">Executive Dashboard</text>
           <text x="780" y="108" text-anchor="middle" fill="#64748B" class="font-mono text-[10px]">BI Reportes Junta</text>
 
           <rect x="680" y="150" width="200" height="90" rx="10" fill="#0F172A" 
                 :stroke="currentStep === 2 ? '#06B6D4' : '#334155'" 
                 :stroke-width="currentStep === 2 ? '2.5' : '1.5'" />
           <text x="780" y="175" text-anchor="middle" fill="#06B6D4" class="font-mono text-xs font-bold uppercase">3. Downstream</text>
-          <text x="780" y="198" text-anchor="middle" fill="#F8FAFC" class="font-display font-semibold text-xs">Inventory Agent AI</text>
+          <text x="780" y="198" text-anchor="middle" fill="#F8FAFC" class="font-sans font-semibold text-xs">Inventory Agent AI</text>
           <text x="780" y="218" text-anchor="middle" fill="#67E8F9" class="font-mono text-[10px]">Agente de Compras</text>
         </g>
       </svg>

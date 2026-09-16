@@ -14,7 +14,7 @@ describe('Server Integration', () => {
   let port: number;
 
   beforeAll(() => {
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       server.listen(0, () => {
         port = (server.address() as AddressInfo).port;
         resolve();

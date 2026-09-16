@@ -107,6 +107,16 @@ io.on('connection', (socket) => {
     socket.emit('qa:list', globalState.getQAQuestions());
   });
 
+  socket.on('presenter:remove-qa', (payload: { secret?: string, id: string }) => {
+    if (payload.secret !== process.env.PRESENTER_SECRET) {
+      return;
+    }
+    if (typeof payload.id === 'string') {
+      globalState.removeQAQuestion(payload.id);
+      io.emit('qa:remove', payload.id);
+    }
+  });
+
   socket.on('audience:vote', (payload: { triggerId: string, uuid: string, option: string }) => {
     // 1. Validación de inputs y estructura
     if (!payload || typeof payload.triggerId !== 'string' || typeof payload.uuid !== 'string' || typeof payload.option !== 'string') {

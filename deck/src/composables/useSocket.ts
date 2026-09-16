@@ -57,6 +57,10 @@ export function useSocket() {
         qaQuestionsList.value.unshift(question);
       });
 
+      socket.value.on('qa:remove', (id: string) => {
+        qaQuestionsList.value = qaQuestionsList.value.filter(q => q.id !== id);
+      });
+
       socket.value.on('session:reset', () => {
         activePollResults.value = {};
         qaQuestionsList.value = [];
@@ -79,6 +83,12 @@ export function useSocket() {
   const requestQAList = (secret: string = '') => {
     if (socket.value && socket.value.connected) {
       socket.value.emit('presenter:get-qa', { secret });
+    }
+  };
+
+  const removeQA = (secret: string = '', id: string) => {
+    if (socket.value && socket.value.connected) {
+      socket.value.emit('presenter:remove-qa', { secret, id });
     }
   };
 
@@ -121,6 +131,7 @@ export function useSocket() {
     emitPresenterSync,
     emitPresenterReset,
     requestQAList,
+    removeQA,
     submitAudienceVote,
     submitAudienceQA,
     simulateVote

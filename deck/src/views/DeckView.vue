@@ -4,25 +4,9 @@
     @click="handleContainerClick"
   >
     <!-- TOP HEADER BAR -->
-    <header class="w-full px-8 py-3.5 flex items-center justify-between z-20 border-b border-slate-800/60 bg-slate-950/40 backdrop-blur-md">
-      <div class="flex items-center gap-3">
-        <div class="w-3 h-3 rounded-full bg-blue-500 shadow-glow-blue animate-pulse"></div>
-        <span class="font-display font-extrabold text-sm tracking-wider text-slate-100 uppercase">Pitch Gen</span>
-        <span class="text-slate-600 text-xs">|</span>
-        <span class="font-mono text-xs text-slate-400">Gobernanza de Datos & Agentes IA</span>
-      </div>
-
-      <!-- Live Interaction Active Badge -->
-      <div v-if="currentSlide?.interactionTrigger" class="flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono text-xs animate-pulse">
-        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-        <span class="font-bold uppercase">Poll Activo:</span> {{ currentSlide.interactionTrigger }}
-      </div>
-
-      <!-- Presentation Category Badge -->
+    <header class="w-full px-8 py-2.5 flex items-center justify-between z-20 border-b border-slate-800/40 bg-slate-950/20 backdrop-blur-md">
       <div class="flex items-center gap-2">
-        <span class="font-mono text-xs text-slate-400 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800">
-          {{ currentSlide?.badge || 'Gobernanza & Trazabilidad' }}
-        </span>
+        <div class="w-2.5 h-2.5 rounded-full bg-blue-500/80 animate-pulse"></div>
       </div>
     </header>
 
@@ -88,7 +72,6 @@
                     <span class="px-2.5 py-1 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono text-xs font-bold uppercase">
                       Pilar 0{{ index + 1 }}
                     </span>
-                    <span class="text-xl">✨</span>
                   </div>
                   <h3 class="text-xl font-display font-bold text-slate-100">{{ step.title }}</h3>
                   <div v-html="sanitize(step.content)" class="text-slate-300 text-sm leading-relaxed"></div>
@@ -117,7 +100,7 @@
                 >
                   <div class="flex items-center justify-between">
                     <span class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono font-bold text-sm flex items-center justify-center">
-                      ⚠️ 0{{ index + 1 }}
+                      0{{ index + 1 }}
                     </span>
                     <span class="text-xs font-mono text-rose-400/80 uppercase font-semibold">Riesgo IA</span>
                   </div>
@@ -286,9 +269,18 @@
               <div 
                 v-for="(q, idx) in qaQuestionsList" 
                 :key="q.id"
-                class="glass-card p-5 rounded-2xl border border-slate-700/60 bg-slate-900/80 shadow-lg space-y-2 h-fit"
+                class="glass-card p-5 rounded-2xl border border-slate-700/60 bg-slate-900/80 shadow-lg space-y-2 h-fit relative group"
               >
-                <div class="flex items-center justify-between text-xs font-mono text-slate-500">
+                <!-- Botón ocultar pregunta -->
+                <button 
+                  @click.stop="handleRemoveQA(q.id)"
+                  class="absolute top-3 right-3 w-7 h-7 rounded-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 transition-colors flex items-center justify-center border border-rose-500/30 font-bold"
+                  title="Eliminar pregunta"
+                >
+                  ✕
+                </button>
+
+                <div class="flex items-center justify-between text-xs font-mono text-slate-500 pr-8">
                   <span class="text-emerald-400 font-bold uppercase">Pregunta #{{ qaQuestionsList.length - idx }}</span>
                   <span>{{ new Date(q.timestamp).toLocaleTimeString() }}</span>
                 </div>
@@ -337,12 +329,7 @@
 
     <!-- BOTTOM FOOTER BAR -->
     <footer class="w-full px-8 py-3 z-20 border-t border-slate-800/60 bg-slate-950/60 backdrop-blur-md flex items-center justify-between">
-      <!-- Presenter Name -->
-      <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
-        <span class="text-slate-300 font-semibold">José Carlos Guerra</span>
-        <span>•</span>
-        <span>Axmos Technologies / GDG Open Lima</span>
-      </div>
+      <div class="flex items-center gap-2"></div>
 
       <!-- Slide Progress Bar & Counter -->
       <div class="flex items-center gap-4 flex-1 max-w-md mx-8">
@@ -413,7 +400,7 @@ const slidesData = slidesDataRaw as unknown as Slide[];
 const route = useRoute();
 const router = useRouter();
 const { initDeck, currentSlide, currentSlideIndex, currentStepIndex, next, prev } = useDeck();
-const { connect, emitPresenterSync, emitPresenterReset, requestQAList, qaQuestionsList } = useSocket();
+const { connect, emitPresenterSync, emitPresenterReset, requestQAList, removeQA, qaQuestionsList } = useSocket();
 
 const presenterSecretInput = ref('');
 const activeSecret = ref(import.meta.env.VITE_PRESENTER_SECRET || '');
@@ -423,6 +410,12 @@ function submitSecret() {
   if (presenterSecretInput.value.trim()) {
     activeSecret.value = presenterSecretInput.value.trim();
     syncWithServer();
+  }
+}
+
+function handleRemoveQA(id: string) {
+  if (activeSecret.value) {
+    removeQA(activeSecret.value, id);
   }
 }
 

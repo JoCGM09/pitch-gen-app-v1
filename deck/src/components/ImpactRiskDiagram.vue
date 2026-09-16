@@ -6,7 +6,7 @@
         <span class="px-2.5 py-1 rounded bg-rose-500/10 border border-rose-500/30 text-rose-400 font-mono text-xs font-bold uppercase">
           Efecto Dominó en IA
         </span>
-        <h3 class="font-display font-bold text-slate-100 text-lg">Simulación de Incidente por Falta de Linaje</h3>
+        <h3 class="font-sans font-bold text-slate-100 text-lg">Simulación de Incidente por Falta de Linaje</h3>
       </div>
       <span class="font-mono text-xs text-rose-400 font-bold">Paso {{ Math.max(1, currentStep + 1) }} / 3</span>
     </div>
@@ -27,7 +27,7 @@
         </div>
 
         <div class="space-y-1">
-          <h4 class="font-display font-bold text-slate-100 text-base leading-snug">{{ step.title }}</h4>
+          <h4 class="font-sans font-bold text-slate-100 text-base leading-snug">{{ step.title }}</h4>
           <p class="text-xs text-slate-300 leading-relaxed">{{ step.description }}</p>
         </div>
 
@@ -47,19 +47,19 @@ defineProps<{
 
 const dominoSteps = [
   {
-    statusBadge: '❌ Filtro SQL Omitido',
+    statusBadge: 'Filtro SQL Omitido',
     title: '1. Error en la Receta dbt',
     description: 'Un desarrollador modifica stg_orders.sql y olvida un filtro de exclusión. Nadie lo nota porque la tabla "parece razonable".',
     impactSnippet: 'WHERE status != "test" (Omitido)'
   },
   {
-    statusBadge: '⚠️ Tabla Corrupta en Warehouse',
+    statusBadge: 'Tabla Corrupta en Warehouse',
     title: '2. Contaminación Silenciosa',
     description: 'La tabla fct_inventory.sql duplica artificialmente el conteo de desabastecimiento de la Región Norte.',
     impactSnippet: 'Inventario Falso: +40% Anómalo'
   },
   {
-    statusBadge: '🚨 Ejecución Irreversible',
+    statusBadge: 'Ejecución Irreversible',
     title: '3. Agente Dispara la Acción',
     description: 'El Agente de IA lee la tabla corrupta, asume escasez y dispara automáticamente $50,000 en compras a proveedores.',
     impactSnippet: 'Ordenes de Compra Disparadas'

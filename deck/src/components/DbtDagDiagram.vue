@@ -1,14 +1,14 @@
 <template>
-  <div class="glass-card rounded-2xl p-6 border border-slate-800/80 shadow-2xl space-y-6 my-2">
+  <div class="glass-card rounded-2xl p-6 border border-slate-800/80 shadow-2xl space-y-6 my-2 bg-slate-950/80">
     <!-- Header info -->
     <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
       <div class="flex items-center gap-3">
         <span class="px-2.5 py-1 rounded bg-orange-500/10 border border-orange-500/30 text-orange-400 font-mono text-xs font-bold uppercase">
           dbt DAG Visualizer
         </span>
-        <h3 class="font-display font-bold text-slate-100 text-lg">Grafo Dirigido Acíclico de Modelos SQL</h3>
+        <h3 class="font-sans font-bold text-slate-100 text-lg">Grafo Dirigido Acíclico de Modelos SQL</h3>
       </div>
-      <span class="font-mono text-xs text-slate-400">Modelos dbt: {{ activeStepNode.name }}</span>
+      <span class="font-mono text-xs text-slate-400">Paso {{ Math.max(1, currentStep + 1) }} / 2 — Modelo: {{ activeStepNode.name }}</span>
     </div>
 
     <!-- SVG Canvas for DAG -->
@@ -20,7 +20,7 @@
           </marker>
         </defs>
 
-        <!-- Node 1: Raw Tables -->
+        <!-- Node 1: Raw Tables (Always Visible) -->
         <g class="transition-all duration-300">
           <rect x="30" y="40" width="160" height="60" rx="8" fill="#0F172A" stroke="#475569" stroke-width="1.5" />
           <text x="110" y="65" text-anchor="middle" fill="#94A3B8" class="font-mono text-xs">source.raw_orders</text>
@@ -34,11 +34,13 @@
         </g>
 
         <!-- Connector Raw -> Staging -->
-        <path d="M 190 70 L 270 70" stroke="#F97316" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-dag)" />
-        <path d="M 190 170 L 270 170" stroke="#F97316" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-dag)" />
+        <path d="M 190 70 L 270 70" fill="none" stroke="#F97316" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-dag)" 
+              :class="{'animate-dash-flow opacity-100': currentStep >= 0, 'opacity-30': currentStep < 0}" class="transition-all duration-300" />
+        <path d="M 190 170 L 270 170" fill="none" stroke="#F97316" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-dag)" 
+              :class="{'animate-dash-flow opacity-100': currentStep >= 0, 'opacity-30': currentStep < 0}" class="transition-all duration-300" />
 
-        <!-- Node 2: Staging dbt Models -->
-        <g :class="{'opacity-100 scale-100': currentStep >= 0, 'opacity-40': currentStep < 0}" class="transition-all duration-300">
+        <!-- Node 2: Staging dbt Models (Step >= 0) -->
+        <g :class="{'opacity-100 scale-100': currentStep >= 0, 'opacity-40 scale-95': currentStep < 0}" class="transition-all duration-300">
           <rect x="270" y="40" width="180" height="60" rx="8" fill="#1E293B" 
                 :stroke="currentStep === 0 ? '#F97316' : '#334155'" 
                 :stroke-width="currentStep === 0 ? '2.5' : '1.5'" />
@@ -46,7 +48,7 @@
           <text x="360" y="85" text-anchor="middle" fill="#F97316" class="font-mono text-[10px]">dbt staging model</text>
         </g>
 
-        <g :class="{'opacity-100 scale-100': currentStep >= 0, 'opacity-40': currentStep < 0}" class="transition-all duration-300">
+        <g :class="{'opacity-100 scale-100': currentStep >= 0, 'opacity-40 scale-95': currentStep < 0}" class="transition-all duration-300">
           <rect x="270" y="140" width="180" height="60" rx="8" fill="#1E293B" 
                 :stroke="currentStep === 0 ? '#F97316' : '#334155'" 
                 :stroke-width="currentStep === 0 ? '2.5' : '1.5'" />
@@ -55,15 +57,17 @@
         </g>
 
         <!-- Connector Staging -> Mart -->
-        <path d="M 450 70 L 550 110" stroke="#F97316" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-dag)" />
-        <path d="M 450 170 L 550 130" stroke="#F97316" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-dag)" />
+        <path d="M 450 70 L 550 110" fill="none" stroke="#F97316" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-dag)" 
+              :class="{'animate-dash-flow opacity-100': currentStep >= 1, 'opacity-30': currentStep < 1}" class="transition-all duration-300" />
+        <path d="M 450 170 L 550 130" fill="none" stroke="#F97316" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-dag)" 
+              :class="{'animate-dash-flow opacity-100': currentStep >= 1, 'opacity-30': currentStep < 1}" class="transition-all duration-300" />
 
-        <!-- Node 3: Mart Model (fct_sales.sql) -->
-        <g :class="{'opacity-100 scale-100': currentStep >= 1, 'opacity-30': currentStep < 1}" class="transition-all duration-300">
+        <!-- Node 3: Mart Model (fct_sales.sql) (Step >= 1) -->
+        <g :class="{'opacity-100 scale-100': currentStep >= 1, 'opacity-30 scale-95': currentStep < 1}" class="transition-all duration-300">
           <rect x="550" y="85" width="200" height="70" rx="10" fill="#030712" 
                 :stroke="currentStep >= 1 ? '#3B82F6' : '#334155'" 
                 :stroke-width="currentStep >= 1 ? '3' : '1.5'" />
-          <text x="650" y="115" text-anchor="middle" fill="#F8FAFC" class="font-display font-bold text-sm">fct_sales.sql</text>
+          <text x="650" y="115" text-anchor="middle" fill="#F8FAFC" class="font-sans font-bold text-sm">fct_sales.sql</text>
           <text x="650" y="135" text-anchor="middle" fill="#3B82F6" class="font-mono text-xs">dbt mart model (Iceberg)</text>
         </g>
       </svg>

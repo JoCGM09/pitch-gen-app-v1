@@ -70,6 +70,10 @@ class SessionState {
     return this.qaQuestions;
   }
 
+  removeQAQuestion(id: string) {
+    this.qaQuestions = this.qaQuestions.filter(q => q.id !== id);
+  }
+
   resetSession() {
     this.polls.clear();
     this.qaQuestions = [];

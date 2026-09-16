@@ -1,5 +1,5 @@
 <template>
-  <div class="glass-card rounded-2xl p-6 border border-slate-800/80 shadow-2xl space-y-6 relative overflow-hidden my-4">
+  <div class="glass-card rounded-2xl p-6 border border-slate-800/80 shadow-2xl space-y-6 relative overflow-hidden my-4 bg-slate-950/80">
     <!-- Ambient Glow background -->
     <div class="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -8,11 +8,9 @@
       <div class="space-y-1">
         <div class="flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
-          <span class="font-mono text-xs font-bold text-rose-400 uppercase tracking-wider">Poll en Tiempo Real</span>
-          <span class="text-slate-600">•</span>
-          <span class="font-mono text-xs text-slate-400">ID: {{ triggerId }}</span>
+          <span class="font-mono text-xs font-bold text-rose-400 uppercase tracking-wider">Encuesta en Tiempo Real</span>
         </div>
-        <h3 class="text-xl md:text-2xl font-display font-bold text-slate-100 leading-snug">
+        <h3 class="text-xl md:text-2xl font-sans font-bold text-slate-100 leading-snug">
           {{ pollData.question }}
         </h3>
       </div>
@@ -22,9 +20,6 @@
         <div class="text-right">
           <p class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Total Votos</p>
           <p class="text-2xl font-mono font-extrabold text-blue-400 leading-none">{{ totalVotes }}</p>
-        </div>
-        <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
-          📊
         </div>
       </div>
     </div>
@@ -37,7 +32,7 @@
         class="space-y-1.5"
       >
         <div class="flex items-center justify-between text-sm font-medium">
-          <span class="text-slate-200 font-display flex items-center gap-2">
+          <span class="text-slate-200 font-sans flex items-center gap-2">
             <span class="w-6 h-6 rounded-md bg-slate-800 text-slate-400 font-mono text-xs font-bold flex items-center justify-center">
               {{ String.fromCharCode(65 + index) }}
             </span>
@@ -113,7 +108,7 @@ const pollDefinitions: Record<string, { question: string; options: string[] }> =
 
 const pollData = computed(() => {
   return pollDefinitions[props.triggerId] || {
-    question: 'Votación Interactiva de Audiencia',
+    question: 'Pregunta Interactiva para la Audiencia',
     options: ['Opción A', 'Opción B', 'Opción C']
   };
 });
@@ -123,7 +118,11 @@ const currentResults = computed(() => {
 });
 
 const totalVotes = computed(() => {
-  return Object.values(currentResults.value).reduce((acc, count) => acc + count, 0);
+  let count = 0;
+  Object.values(currentResults.value).forEach(v => {
+    count += v;
+  });
+  return count;
 });
 
 function getVotes(option: string): number {
@@ -137,12 +136,13 @@ function getPercentage(option: string): number {
 }
 
 function barColorClass(index: number): string {
-  switch (index % 3) {
-    case 0: return 'from-blue-600 to-cyan-400 shadow-glow-blue';
-    case 1: return 'from-purple-600 to-indigo-400 shadow-glow-purple';
-    case 2:
-    default: return 'from-emerald-600 to-teal-400 shadow-glow-emerald';
-  }
+  const colors = [
+    'from-blue-600 to-cyan-500',
+    'from-purple-600 to-indigo-500',
+    'from-emerald-600 to-teal-500',
+    'from-amber-600 to-orange-500'
+  ];
+  return colors[index % colors.length];
 }
 
 function onSimulate(option: string) {

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: pitch-gen-realtime
+    env: node
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: ALLOWED_ORIGIN
+        sync: false # Set in Render dashboard (e.g. https://pitch-gen.vercel.app)
+      - key: PRESENTER_SECRET
+        sync: false # Set in Render dashboard

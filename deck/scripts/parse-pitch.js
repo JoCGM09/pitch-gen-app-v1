@@ -19,7 +19,7 @@ function parsePitch() {
   const badgeRegex = /<!-- badge:\s*(.*?)\s*-->/g;
 
   // Split por slide '---'
-  const slideBlocks = markdown.split(/\n---\n/);
+  const slideBlocks = markdown.split(/\r?\n---\r?\n/);
 
   const slides = slideBlocks.map((block, slideIndex) => {
     let rawContent = block.trim();
@@ -81,7 +81,7 @@ function parsePitch() {
     baseRaw = baseRaw.replace(/^--\s*[\r\n]+/, '').trim();
 
     // Separar content base y steps con '--'
-    let parts = baseRaw.split(/\n--\n/).map(p => p.trim()).filter(Boolean);
+    let parts = baseRaw.split(/\r?\n--\r?\n/).map(p => p.trim()).filter(Boolean);
     
     let baseContentHtml = '';
     let stepParts = [];

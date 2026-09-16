@@ -74,3 +74,44 @@
 .animate-dash-flow {
   animation: dash-flow 1.5s linear infinite;
 }
+
+/* -------------------------------------------------------------
+   Reglas de impresión para PDF (Fallback y entrega de slides)
+   ------------------------------------------------------------- */
+@media print {
+  /* Restablecer estilos de body para que fluya hacia abajo en lugar de ser fijo */
+  body {
+    background: #000 !important;
+    overflow: visible !important;
+    color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Ocultar interfaces de navegación, fondos y overlays */
+  header, footer, button, .glass-card-hover:hover {
+    display: none !important;
+  }
+
+  .deck-container {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Convertir el canvas principal para que renderice todo en flujo continuo */
+  main {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Forzar salto de página entre slides (el sistema necesitará una vista que muestre todas) */
+  .print-slide {
+    page-break-after: always;
+    break-after: page;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
