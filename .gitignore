@@ -1,10 +1,12 @@
 # Dependencies
 /node_modules
+**/node_modules
 /bower_components
 
 # Build artifacts
 /build
 /dist
+**/dist
 /out
 /target
 .next/
