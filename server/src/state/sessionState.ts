@@ -51,7 +51,13 @@ class SessionState {
       }
       poll.set(option, new Set());
     }
-    poll.get(option)!.add(voterUUID);
+
+    const voters = poll.get(option)!;
+    // Limit maximum voters per option to 5000 to prevent DoS via infinite UUID generation
+    if (voters.size >= 5000) {
+      return;
+    }
+    voters.add(voterUUID);
   }
 
   getPollResults(triggerId: string) {

@@ -430,7 +430,7 @@ const { initDeck, currentSlide, currentSlideIndex, currentStepIndex, next, prev 
 const { connect, isConnected, isAuthenticated, authError, emitPresenterSync, emitPresenterReset, requestQAList, removeQA, qaQuestionsList } = useSocket();
 
 const presenterSecretInput = ref('');
-const activeSecret = ref(import.meta.env.VITE_PRESENTER_SECRET || '');
+const activeSecret = ref(sessionStorage.getItem('pitchgen_presenter_secret') || '');
 const manualShowPrompt = ref(false);
 
 const showSecretPrompt = computed(() => !activeSecret.value || manualShowPrompt.value || !!authError.value);
@@ -445,7 +445,9 @@ function closeSecretModal() {
 }
 
 function submitSecret() {
-  activeSecret.value = presenterSecretInput.value.trim();
+  const secret = presenterSecretInput.value.trim();
+  activeSecret.value = secret;
+  sessionStorage.setItem('pitchgen_presenter_secret', secret);
   manualShowPrompt.value = false;
   syncWithServer();
 }
