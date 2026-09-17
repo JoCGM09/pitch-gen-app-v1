@@ -7,6 +7,22 @@
     <header class="w-full px-8 py-2.5 flex items-center justify-between z-20 border-b border-slate-800/40 bg-slate-950/20 backdrop-blur-md">
       <div class="flex items-center gap-2">
         <div class="w-2.5 h-2.5 rounded-full bg-blue-500/80 animate-pulse"></div>
+        <span class="font-display font-extrabold text-sm tracking-wider uppercase text-slate-100">Pitch Gen</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Socket / Secret Status Button -->
+        <button 
+          @click.stop="openSecretModal" 
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs font-mono hover:border-slate-700 transition-colors"
+          :title="'Clave actual: ' + (activeSecret || 'Ninguna')"
+        >
+          <span class="w-2 h-2 rounded-full" :class="isConnected ? (isAuthenticated ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-red-400 animate-ping') : 'bg-amber-400 animate-pulse'"></span>
+          <span class="text-slate-300 font-medium">
+            {{ isConnected ? (isAuthenticated ? 'Sincronizado' : (authError ? 'Error Clave' : 'Autenticando...')) : 'Desconectado' }}
+          </span>
+          <span class="text-slate-500 text-[10px]">🔑</span>
+        </button>
       </div>
     </header>
 
@@ -356,16 +372,27 @@
     <!-- Secret Prompt Overlay -->
     <div v-if="showSecretPrompt" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center" @click.stop>
       <div class="bg-slate-900 border border-slate-700 p-8 rounded-2xl w-full max-w-md space-y-6">
-        <h2 class="text-2xl font-display font-bold text-slate-100">Autenticación de Presentador</h2>
-        <p class="text-sm text-slate-400">Introduce la clave de la sesión para sincronizar tu deck con la audiencia en tiempo real.</p>
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-display font-bold text-slate-100">Autenticación de Presentador</h2>
+          <button v-if="activeSecret && !authError" @click="closeSecretModal" class="text-slate-400 hover:text-slate-200">✕</button>
+        </div>
+        <p class="text-sm text-slate-400">Introduce la clave de la sesión configurada en Render (PRESENTER_SECRET) para sincronizar tu deck con la audiencia en tiempo real.</p>
+        
+        <div v-if="authError" class="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-mono">
+          ⚠️ {{ authError }}
+        </div>
+
         <div class="space-y-4">
-          <input 
-            type="password" 
-            v-model="presenterSecretInput" 
-            placeholder="Clave secreta..."
-            @keydown.enter="submitSecret"
-            class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-blue-500"
-          />
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Clave Secreta:</label>
+            <input 
+              type="password" 
+              v-model="presenterSecretInput" 
+              placeholder="Ej. secreto-pitch-2024"
+              @keydown.enter="submitSecret"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-slate-100 focus:outline-none focus:border-blue-500 font-mono"
+            />
+          </div>
           <button 
             @click="submitSecret" 
             class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-colors"
@@ -400,17 +427,27 @@ const slidesData = slidesDataRaw as unknown as Slide[];
 const route = useRoute();
 const router = useRouter();
 const { initDeck, currentSlide, currentSlideIndex, currentStepIndex, next, prev } = useDeck();
-const { connect, emitPresenterSync, emitPresenterReset, requestQAList, removeQA, qaQuestionsList } = useSocket();
+const { connect, isConnected, isAuthenticated, authError, emitPresenterSync, emitPresenterReset, requestQAList, removeQA, qaQuestionsList } = useSocket();
 
 const presenterSecretInput = ref('');
 const activeSecret = ref(import.meta.env.VITE_PRESENTER_SECRET || '');
-const showSecretPrompt = computed(() => !activeSecret.value);
+const manualShowPrompt = ref(false);
+
+const showSecretPrompt = computed(() => !activeSecret.value || manualShowPrompt.value || !!authError.value);
+
+function openSecretModal() {
+  presenterSecretInput.value = activeSecret.value;
+  manualShowPrompt.value = true;
+}
+
+function closeSecretModal() {
+  manualShowPrompt.value = false;
+}
 
 function submitSecret() {
-  if (presenterSecretInput.value.trim()) {
-    activeSecret.value = presenterSecretInput.value.trim();
-    syncWithServer();
-  }
+  activeSecret.value = presenterSecretInput.value.trim();
+  manualShowPrompt.value = false;
+  syncWithServer();
 }
 
 function handleRemoveQA(id: string) {

@@ -69,8 +69,10 @@ io.on('connection', (socket: any) => {
     const expectedSecret = process.env.PRESENTER_SECRET;
     if (expectedSecret && payload.secret !== expectedSecret) {
       console.warn(`[Socket] Intento no autorizado de presenter:sync desde ${socket.id}`);
+      socket.emit('presenter:auth-error', { message: 'La clave enviada no coincide con la configurada en Render' });
       return;
     }
+    socket.emit('presenter:auth-success');
 
     // 2. Validación de inputs básicos
     if (typeof payload.slideIndex !== 'number' || typeof payload.stepIndex !== 'number') {

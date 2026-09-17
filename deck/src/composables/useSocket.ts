@@ -3,6 +3,8 @@ import { ref } from 'vue';
 
 const socket = ref<Socket | null>(null);
 const isConnected = ref(false);
+const isAuthenticated = ref(false);
+const authError = ref<string | null>(null);
 const activePollResults = ref<Record<string, Record<string, number>>>({});
 const audienceSnapshot = ref<{ currentSlideIndex: number; currentStepIndex: number; activeTrigger: string | null } | null>(null);
 const qaQuestionsList = ref<{ id: string; uuid: string; question: string; timestamp: number }[]>([]);
@@ -22,6 +24,18 @@ export function useSocket() {
 
       socket.value.on('connect', () => {
         isConnected.value = true;
+      });
+
+      socket.value.on('presenter:auth-error', (data: { message: string }) => {
+        authError.value = data?.message || 'La clave enviada no coincide con la configurada en Render';
+        isAuthenticated.value = false;
+        console.error('❌ Auth Error:', authError.value);
+      });
+
+      socket.value.on('presenter:auth-success', () => {
+        authError.value = null;
+        isAuthenticated.value = true;
+        console.log('✅ Presenter Autenticado');
       });
 
       socket.value.on('disconnect', (reason) => {
@@ -125,6 +139,8 @@ export function useSocket() {
   return {
     socket,
     isConnected,
+    isAuthenticated,
+    authError,
     activePollResults,
     audienceSnapshot,
     qaQuestionsList,
