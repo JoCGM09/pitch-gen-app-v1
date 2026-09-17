@@ -8,7 +8,8 @@ const audienceSnapshot = ref<{ currentSlideIndex: number; currentStepIndex: numb
 const qaQuestionsList = ref<{ id: string; uuid: string; question: string; timestamp: number }[]>([]);
 
 export function useSocket() {
-  const connect = (url: string = 'http://localhost:3001', sessionId: string = 'default') => {
+  const defaultUrl = import.meta.env.VITE_WS_URL || 'https://pitch-gen-realtime.onrender.com';
+  const connect = (url: string = defaultUrl, sessionId: string = 'default') => {
     if (!socket.value) {
       socket.value = io(url, {
         query: { sessionId },

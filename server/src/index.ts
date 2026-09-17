@@ -66,7 +66,8 @@ io.on('connection', (socket: any) => {
 
   socket.on('presenter:sync', (payload: { slideIndex: number, stepIndex: number, trigger: string | null, secret?: string }) => {
     // 1. Autorización dinámica evaluada contra env
-    if (!process.env.PRESENTER_SECRET || payload.secret !== process.env.PRESENTER_SECRET) {
+    const expectedSecret = process.env.PRESENTER_SECRET;
+    if (expectedSecret && payload.secret !== expectedSecret) {
       console.warn(`[Socket] Intento no autorizado de presenter:sync desde ${socket.id}`);
       return;
     }
@@ -89,7 +90,8 @@ io.on('connection', (socket: any) => {
   });
 
   socket.on('presenter:reset', (payload: { secret?: string }) => {
-    if (!process.env.PRESENTER_SECRET || payload.secret !== process.env.PRESENTER_SECRET) {
+    const expectedSecret = process.env.PRESENTER_SECRET;
+    if (expectedSecret && payload.secret !== expectedSecret) {
       return;
     }
     globalState.resetSession();
@@ -101,14 +103,16 @@ io.on('connection', (socket: any) => {
   });
 
   socket.on('presenter:get-qa', (payload: { secret?: string }) => {
-    if (!process.env.PRESENTER_SECRET || payload.secret !== process.env.PRESENTER_SECRET) {
+    const expectedSecret = process.env.PRESENTER_SECRET;
+    if (expectedSecret && payload.secret !== expectedSecret) {
       return;
     }
     socket.emit('qa:list', globalState.getQAQuestions());
   });
 
   socket.on('presenter:remove-qa', (payload: { secret?: string, id: string }) => {
-    if (!process.env.PRESENTER_SECRET || payload.secret !== process.env.PRESENTER_SECRET) {
+    const expectedSecret = process.env.PRESENTER_SECRET;
+    if (expectedSecret && payload.secret !== expectedSecret) {
       return;
     }
     if (typeof payload.id === 'string') {

@@ -86,8 +86,8 @@ watch(isConnected, (connected) => {
 
 onMounted(() => {
   userUuid.value = getOrCreateUuid();
-  // Fallback to localhost if env var not set
-  connect(import.meta.env.VITE_WS_URL || 'http://localhost:3001', sessionId.value);
+  // Fallback to production Render URL if env var not set
+  connect(import.meta.env.VITE_WS_URL || 'https://pitch-gen-realtime.onrender.com', sessionId.value);
 });
 
 function onVote(option: string) {

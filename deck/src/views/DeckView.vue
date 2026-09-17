@@ -453,7 +453,7 @@ function syncWithServer() {
 
 onMounted(() => {
   initDeck(slidesData as any);
-  connect(import.meta.env.VITE_WS_URL || 'http://localhost:3001', 'deck');
+  connect(import.meta.env.VITE_WS_URL || 'https://pitch-gen-realtime.onrender.com', 'deck');
   syncStateFromRoute();
   syncWithServer();
 });
