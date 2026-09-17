@@ -58,7 +58,7 @@ const RATE_LIMIT_WINDOW_MS = 1000; // 1 voto por segundo por UUID
 const QA_RATE_LIMIT_WINDOW_MS = 30000; // 1 pregunta cada 30 segundos por UUID
 
 // Conexión de clientes a Socket.io
-io.on('connection', (socket) => {
+io.on('connection', (socket: any) => {
   console.log(`[Socket] Nuevo cliente conectado: ${socket.id}`);
 
   // Enviar el estado actual apenas se conecta alguien
