@@ -3,6 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import { globalState } from './state/sessionState';
+import { quizService } from './services/quizService';
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -86,6 +87,7 @@ io.on('connection', (socket: any) => {
 
   // Enviar el estado actual apenas se conecta alguien
   socket.emit('audience:sync', globalState.getSnapshot());
+  socket.emit('quiz:stats', quizService.getStats());
 
   socket.on('presenter:sync', (payload: { slideIndex: number, stepIndex: number, trigger: string | null, secret?: string }) => {
     // 1. Autorización dinámica evaluada contra env (Fail-closed)
@@ -120,8 +122,10 @@ io.on('connection', (socket: any) => {
       return;
     }
     globalState.resetSession();
+    quizService.resetAll();
     io.emit('session:reset');
     io.emit('qa:list', []);
+    io.emit('quiz:stats', quizService.getStats());
     if (globalState.activeTrigger) {
       io.emit('poll:results', { triggerId: globalState.activeTrigger, results: {} });
     }
@@ -213,6 +217,51 @@ io.on('connection', (socket: any) => {
 
     globalState.addQAQuestion(qaItem);
     io.emit('qa:new', qaItem);
+  });
+
+  // QUIZ INTERACTIVO EVENTOS
+  socket.on('audience:quiz-start', (payload: { uuid: string }) => {
+    if (!payload || typeof payload.uuid !== 'string' || payload.uuid.length > 100) {
+      return;
+    }
+
+    const now = Date.now();
+    const clientIp = getClientIp(socket);
+    const lastVoteTime = voteRateLimits.get(clientIp) || 0;
+    const isTest = process.env.NODE_ENV === 'test';
+
+    if (!isTest && (now - lastVoteTime < RATE_LIMIT_WINDOW_MS)) {
+      return;
+    }
+    voteRateLimits.set(clientIp, now);
+
+    const session = quizService.getCurrentSession(payload.uuid);
+    socket.emit('quiz:session', session);
+    io.emit('quiz:stats', quizService.getStats());
+  });
+
+  socket.on('audience:quiz-submit', (payload: { uuid: string, questionId: string, optionIndex: number }) => {
+    if (!payload || typeof payload.uuid !== 'string' || typeof payload.questionId !== 'string' || typeof payload.optionIndex !== 'number') {
+      return;
+    }
+
+    if (payload.uuid.length > 100 || payload.questionId.length > 100) {
+      return;
+    }
+
+    const now = Date.now();
+    const clientIp = getClientIp(socket);
+    const lastVoteTime = voteRateLimits.get(clientIp) || 0;
+    const isTest = process.env.NODE_ENV === 'test';
+
+    if (!isTest && (now - lastVoteTime < RATE_LIMIT_WINDOW_MS)) {
+      return;
+    }
+    voteRateLimits.set(clientIp, now);
+
+    const result = quizService.submitAnswer(payload.uuid, payload.questionId, payload.optionIndex);
+    socket.emit('quiz:answer-result', result);
+    io.emit('quiz:stats', quizService.getStats());
   });
 
   socket.on('disconnect', () => {

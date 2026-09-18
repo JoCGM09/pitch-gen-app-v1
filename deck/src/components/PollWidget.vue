@@ -1,5 +1,6 @@
 <template>
-  <div class="glass-card rounded-2xl p-6 border border-slate-800/80 shadow-2xl space-y-6 relative overflow-hidden my-4 bg-slate-950/80">
+  <QuizStatsWidget v-if="triggerId === 'final-quiz'" />
+  <div v-else class="glass-card rounded-2xl p-6 border border-slate-800/80 shadow-2xl space-y-6 relative overflow-hidden my-4 bg-slate-950/80">
     <!-- Ambient Glow background -->
     <div class="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -82,6 +83,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useSocket } from '../composables/useSocket';
+import QuizStatsWidget from './QuizStatsWidget.vue';
 
 const props = defineProps<{
   triggerId: string;

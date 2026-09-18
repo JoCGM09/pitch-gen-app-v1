@@ -173,4 +173,56 @@ describe('Server Integration', () => {
       });
     });
   });
+
+  describe('Quiz Integration', () => {
+    const quizUuid = 'quiz-user-123';
+
+    it('should start a quiz and receive questions', () => {
+      return new Promise<void>((resolve) => {
+        clientSocket.emit('audience:quiz-start', { uuid: quizUuid });
+
+        clientSocket.on('quiz:session', (session) => {
+          expect(session.streak).toBe(0);
+          expect(session.questions).toHaveLength(4);
+          resolve();
+        });
+      });
+    });
+
+    it('should submit an answer and receive a result', () => {
+      return new Promise<void>((resolve) => {
+        // First start the quiz to get a question
+        clientSocket.emit('audience:quiz-start', { uuid: quizUuid });
+
+        clientSocket.once('quiz:session', (session) => {
+          const firstQuestion = session.questions[0];
+          
+          clientSocket.emit('audience:quiz-submit', { 
+            uuid: quizUuid, 
+            questionId: firstQuestion.id, 
+            optionIndex: 0 // We don't know if it's correct but we expect a response
+          });
+
+          clientSocket.on('quiz:answer-result', (result) => {
+            expect(result).toHaveProperty('correct');
+            expect(result).toHaveProperty('streak');
+            resolve();
+          });
+        });
+      });
+    });
+
+    it('should broadcast quiz stats to all clients', () => {
+      return new Promise<void>((resolve) => {
+        clientSocket.emit('audience:quiz-start', { uuid: 'another-user' });
+
+        clientSocket.on('quiz:stats', (stats) => {
+          if (stats.totalParticipants >= 1) {
+            expect(stats).toHaveProperty('totalParticipants');
+            resolve();
+          }
+        });
+      });
+    });
+  });
 });

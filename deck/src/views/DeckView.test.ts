@@ -11,10 +11,14 @@ import { ref } from 'vue';
 // Mock useSocket
 vi.mock('../composables/useSocket', () => ({
   useSocket: () => ({
+    isConnected: ref(true),
+    isAuthenticated: ref(true),
+    authError: ref(null),
     connect: vi.fn(),
     emitPresenterSync: vi.fn(),
     emitPresenterReset: vi.fn(),
     requestQAList: vi.fn(),
+    removeQA: vi.fn(),
     qaQuestionsList: ref([]),
     activePollResults: ref({}),
     simulateVote: vi.fn()
@@ -46,6 +50,8 @@ describe('DeckView.vue', () => {
     currentSlideIndex.value = 0;
     currentStepIndex.value = -1;
     slides.value = slidesData as any;
+
+    sessionStorage.setItem('pitchgen_presenter_secret', 'dev-secret-key');
 
     router = createRouter({
       history: createWebHistory(),

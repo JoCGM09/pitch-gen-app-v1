@@ -26,9 +26,15 @@
     <!-- Main Content Body -->
     <main class="flex-1 my-4 flex flex-col overflow-y-auto custom-scrollbar pr-1 relative z-0">
       <div class="h-full flex flex-col space-y-6" :class="!activeTrigger ? 'justify-start' : 'justify-center'">
+        <!-- Final Quiz Mode -->
+        <ActiveQuizMobile 
+          v-if="activeTrigger === 'final-quiz'" 
+          :uuid="userUuid" 
+        />
+
         <!-- Active Poll Mode if Trigger Active -->
         <ActivePollMobile 
-          v-if="activeTrigger" 
+          v-else-if="activeTrigger" 
           :triggerId="activeTrigger" 
           :uuid="userUuid"
           @vote="onVote"
@@ -52,6 +58,7 @@ import { useRoute } from 'vue-router';
 import { useSocket } from '../composables/useSocket';
 import IdleScreen from '../components/IdleScreen.vue';
 import ActivePollMobile from '../components/ActivePollMobile.vue';
+import ActiveQuizMobile from '../components/ActiveQuizMobile.vue';
 import QABoxMobile from '../components/QABoxMobile.vue';
 
 const route = useRoute();

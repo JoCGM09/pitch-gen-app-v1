@@ -8,6 +8,11 @@ const authError = ref<string | null>(null);
 const activePollResults = ref<Record<string, Record<string, number>>>({});
 const audienceSnapshot = ref<{ currentSlideIndex: number; currentStepIndex: number; activeTrigger: string | null } | null>(null);
 const qaQuestionsList = ref<{ id: string; uuid: string; question: string; timestamp: number }[]>([]);
+const quizSession = ref<{ streak: number; questions: { id: string; question: string; options: string[] }[] } | null>(null);
+const quizAnswerResult = ref<{ correct: boolean; streak: number; completed: boolean; newQuestions?: any[] } | null>(null);
+const quizStats = ref<{ 0: number; 1: number; 2: number; 3: number; 4: number; totalParticipants: number }>({
+  0: 0, 1: 0, 2: 0, 3: 0, 4: 0, totalParticipants: 0
+});
 
 export function useSocket() {
   const defaultUrl = import.meta.env.VITE_WS_URL || 'https://pitch-gen-realtime.onrender.com';
@@ -79,6 +84,30 @@ export function useSocket() {
       socket.value.on('session:reset', () => {
         activePollResults.value = {};
         qaQuestionsList.value = [];
+        quizSession.value = null;
+        quizAnswerResult.value = null;
+      });
+
+      socket.value.on('quiz:session', (session: any) => {
+        quizSession.value = session;
+      });
+
+      socket.value.on('quiz:answer-result', (result: any) => {
+        quizAnswerResult.value = result;
+        if (result && result.newQuestions) {
+          quizSession.value = {
+            streak: result.streak,
+            questions: result.newQuestions
+          };
+        } else if (quizSession.value && result) {
+          quizSession.value.streak = result.streak;
+        }
+      });
+
+      socket.value.on('quiz:stats', (stats: any) => {
+        if (stats) {
+          quizStats.value = stats;
+        }
       });
     }
   };
@@ -119,6 +148,18 @@ export function useSocket() {
     }
   };
 
+  const startQuiz = (uuid: string) => {
+    if (socket.value && socket.value.connected) {
+      socket.value.emit('audience:quiz-start', { uuid });
+    }
+  };
+
+  const submitQuizAnswer = (uuid: string, questionId: string, optionIndex: number) => {
+    if (socket.value && socket.value.connected) {
+      socket.value.emit('audience:quiz-submit', { uuid, questionId, optionIndex });
+    }
+  };
+
   const simulateVote = (triggerId: string, option: string) => {
     const current = activePollResults.value[triggerId] || {};
     const count = (current[option] || 0) + 1;
@@ -144,6 +185,9 @@ export function useSocket() {
     activePollResults,
     audienceSnapshot,
     qaQuestionsList,
+    quizSession,
+    quizAnswerResult,
+    quizStats,
     connect,
     emitPresenterSync,
     emitPresenterReset,
@@ -151,6 +195,8 @@ export function useSocket() {
     removeQA,
     submitAudienceVote,
     submitAudienceQA,
+    startQuiz,
+    submitQuizAnswer,
     simulateVote
   };
 }

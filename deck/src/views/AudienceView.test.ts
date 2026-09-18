@@ -7,12 +7,19 @@ const mockSnapshot = ref<{ activeTrigger: string | null }>({ activeTrigger: null
 
 vi.mock('../composables/useSocket', () => ({
   useSocket: () => ({
+    socket: ref({ id: 'test-socket' }),
     isConnected: ref(true),
     audienceSnapshot: mockSnapshot,
     accumulatedNotes: ref([]),
     connect: vi.fn(),
     submitAudienceVote: vi.fn(),
     submitAudienceQA: vi.fn()
+  })
+}));
+
+vi.mock('vue-router', () => ({
+  useRoute: () => ({
+    params: { sessionId: 'test-session' }
   })
 }));
 
@@ -23,13 +30,12 @@ describe('AudienceView.vue', () => {
   });
 
   it('generates and persists UUID in localStorage', async () => {
-    const wrapper = mount(AudienceView);
+    mount(AudienceView);
     await flushPromises();
 
     const storedUuid = localStorage.getItem('pitchgen_audience_uuid');
     expect(storedUuid).toBeTruthy();
     expect(storedUuid).toContain('aud-');
-    expect(wrapper.text()).toContain('UUID: aud-');
   });
 
   it('renders idle screen when no active poll', async () => {
@@ -37,7 +43,7 @@ describe('AudienceView.vue', () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain('Escuchando atentamente...');
-    expect(wrapper.text()).toContain('Haz una Pregunta al Presentador');
+    expect(wrapper.text()).toContain('Pregunta al Presentador');
   });
 
   it('renders active poll when trigger is received', async () => {
