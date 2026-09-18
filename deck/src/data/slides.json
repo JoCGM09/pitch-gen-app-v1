@@ -407,6 +407,7 @@
     "layout": "qa-view",
     "subtitle": "Preguntas de la audiencia recibidas durante la charla",
     "badge": "SESIÓN INTERACTIVA",
-    "content": ""
+    "content": "",
+    "interactionTrigger": "final-quiz"
   }
 ]

@@ -21,6 +21,7 @@ vi.mock('../composables/useSocket', () => ({
     removeQA: vi.fn(),
     qaQuestionsList: ref([]),
     activePollResults: ref({}),
+    quizStats: ref({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, totalParticipants: 0 }),
     simulateVote: vi.fn()
   })
 }));

@@ -75,12 +75,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useSocket } from '../composables/useSocket';
 
-const { quizStats } = useSocket();
+const socketComposable = useSocket();
+const quizStats = socketComposable?.quizStats || ref({ 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, totalParticipants: 0 });
 
-const stats = computed(() => quizStats.value || { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, totalParticipants: 0 });
+const stats = computed(() => (quizStats && quizStats.value) ? quizStats.value : { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, totalParticipants: 0 });
 
 const levels = [
   { streak: 4, label: 'Completado (Racha 4/4)', icon: '🏆', barColor: 'bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]' },

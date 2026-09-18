@@ -273,7 +273,7 @@
           </div>
 
           <!-- LAYOUT QA VIEW -->
-          <div v-else-if="currentSlide.layout === 'qa-view'" class="flex flex-col space-y-4 my-auto h-full max-h-[70vh]">
+          <div v-else-if="currentSlide.layout === 'qa-view'" class="flex flex-col space-y-4 my-auto h-full max-h-[75vh]">
             <div class="space-y-1 text-center shrink-0">
               <h2 class="text-3xl md:text-4xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200">
                 {{ currentSlide.title }}
@@ -281,30 +281,41 @@
               <p class="text-sm text-slate-400 font-light max-w-2xl mx-auto">{{ currentSlide.subtitle }}</p>
             </div>
 
-            <div class="flex-1 overflow-y-auto mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-max pr-4 custom-scrollbar">
-              <div 
-                v-for="(q, idx) in qaQuestionsList" 
-                :key="q.id"
-                class="glass-card p-5 rounded-2xl border border-slate-700/60 bg-slate-900/80 shadow-lg space-y-2 h-fit relative group"
-              >
-                <!-- Botón ocultar pregunta -->
-                <button 
-                  @click.stop="handleRemoveQA(q.id)"
-                  class="absolute top-3 right-3 w-7 h-7 rounded-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 transition-colors flex items-center justify-center border border-rose-500/30 font-bold"
-                  title="Eliminar pregunta"
-                >
-                  ✕
-                </button>
-
-                <div class="flex items-center justify-between text-xs font-mono text-slate-500 pr-8">
-                  <span class="text-emerald-400 font-bold uppercase">Pregunta #{{ qaQuestionsList.length - idx }}</span>
-                  <span>{{ new Date(q.timestamp).toLocaleTimeString() }}</span>
-                </div>
-                <p class="text-lg text-slate-200 font-light leading-relaxed">{{ q.question }}</p>
+            <!-- Two Columns: Quiz Stats Widget on Left, Q&A on Right -->
+            <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden mt-2">
+              <div class="h-full overflow-y-auto pr-2 custom-scrollbar">
+                <QuizStatsWidget />
               </div>
 
-              <div v-if="qaQuestionsList.length === 0" class="col-span-1 md:col-span-2 text-center p-12 border border-dashed border-slate-700/50 rounded-2xl">
-                <p class="text-slate-400 font-mono text-sm">No hay preguntas de la audiencia todavía.</p>
+              <div class="h-full overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                <div class="text-xs font-mono text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-800 pb-2">
+                  <span>Preguntas en Vivo ({{ qaQuestionsList.length }})</span>
+                  <span>💬 Q&A</span>
+                </div>
+
+                <div 
+                  v-for="(q, idx) in qaQuestionsList" 
+                  :key="q.id"
+                  class="glass-card p-4 rounded-2xl border border-slate-700/60 bg-slate-900/80 shadow-lg space-y-2 relative group"
+                >
+                  <button 
+                    @click.stop="handleRemoveQA(q.id)"
+                    class="absolute top-3 right-3 w-6 h-6 rounded-full bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 transition-colors flex items-center justify-center border border-rose-500/30 font-bold text-xs"
+                    title="Eliminar pregunta"
+                  >
+                    ✕
+                  </button>
+
+                  <div class="flex items-center justify-between text-xs font-mono text-slate-500 pr-8">
+                    <span class="text-emerald-400 font-bold uppercase">Pregunta #{{ qaQuestionsList.length - idx }}</span>
+                    <span>{{ new Date(q.timestamp).toLocaleTimeString() }}</span>
+                  </div>
+                  <p class="text-base text-slate-200 font-light leading-relaxed">{{ q.question }}</p>
+                </div>
+
+                <div v-if="qaQuestionsList.length === 0" class="text-center p-8 border border-dashed border-slate-700/50 rounded-2xl">
+                  <p class="text-slate-400 font-mono text-xs">No hay preguntas de la audiencia todavía.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -416,6 +427,7 @@ import DataLineageTreeDiagram from '../components/DataLineageTreeDiagram.vue';
 import OpenLineageDiagram from '../components/OpenLineageDiagram.vue';
 import ImpactRiskDiagram from '../components/ImpactRiskDiagram.vue';
 import PollWidget from '../components/PollWidget.vue';
+import QuizStatsWidget from '../components/QuizStatsWidget.vue';
 import { useDeck } from '../composables/useDeck';
 import { useKeyboardControls } from '../composables/useKeyboardControls';
 import { useSocket } from '../composables/useSocket';

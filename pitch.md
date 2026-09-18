@@ -320,6 +320,7 @@ Tres pasos: piloto pequeño, auditar trazabilidad antes de sumar más agentes y 
 
 ---
 <!-- layout: qa-view -->
+<!-- trigger: final-quiz -->
 <!-- badge: SESIÓN INTERACTIVA -->
 <!-- subtitle: Preguntas de la audiencia recibidas durante la charla -->
 # Preguntas y Respuestas (Q&A)
